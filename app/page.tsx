@@ -84,26 +84,26 @@ export default function Home() {
       <div className="fixed inset-0 bg-gradient-to-br from-emerald-900/10 via-transparent to-blue-900/10" />
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.05),transparent_50%)]" />
 
-      <div className="relative z-10 p-6 min-h-screen flex flex-col">
+      <div className="relative z-10 p-4 lg:p-6 min-h-screen flex flex-col">
         {/* Header */}
         <motion.header
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8 }}
-          className="flex justify-between items-center mb-8"
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 lg:mb-8 gap-4"
         >
           <div>
-            <h1 className="text-4xl font-bold text-emerald-400 font-mono tracking-wider">
+            <h1 className="text-3xl lg:text-4xl font-bold text-emerald-400 font-mono tracking-wider">
               THE BREACH DASHBOARD
             </h1>
             <p className="text-gray-400 font-mono text-sm mt-1">
               Cyber Operations Center • Real-time Intelligence Hub
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
             <Button
               onClick={() => setShowSubmissionForm(true)}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-mono px-6 py-3 rounded-md transition-colors flex items-center gap-2"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-mono px-4 lg:px-6 py-3 rounded-md transition-colors flex items-center justify-center gap-2 min-h-[44px]"
             >
               <Plus size={20} />
               SUBMIT FINDING
@@ -111,7 +111,7 @@ export default function Home() {
             <Button
               onClick={handleLogout}
               variant="outline"
-              className="border-red-500/20 hover:bg-red-500/10 text-red-400 font-mono px-4 py-3 rounded-md transition-colors flex items-center gap-2"
+              className="border-red-500/20 hover:bg-red-500/10 text-red-400 font-mono px-4 py-3 rounded-md transition-colors flex items-center justify-center gap-2 min-h-[44px]"
             >
               <LogOut size={20} />
               LOGOUT
@@ -120,27 +120,27 @@ export default function Home() {
         </motion.header>
 
         {/* Main Grid - Zero-G Layout */}
-        <div className="flex-1 grid grid-cols-12 gap-6">
+        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-6">
           {/* Squad Status - Floating Panel */}
           <motion.div
             initial={{ x: -100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="col-span-3"
+            className="lg:col-span-3 order-2 lg:order-1"
           >
-            <div className="bg-[#0a0a0a] border border-emerald-500/20 rounded-lg p-6 backdrop-blur-md bg-opacity-10 sticky top-6">
-              <h2 className="text-xl font-bold text-emerald-400 mb-6 font-mono flex items-center gap-2">
-                <Users size={24} />
+            <div className="bg-[#0a0a0a] border border-emerald-500/20 rounded-lg p-4 lg:p-6 backdrop-blur-md bg-opacity-10 sticky top-6">
+              <h2 className="text-lg lg:text-xl font-bold text-emerald-400 mb-4 lg:mb-6 font-mono flex items-center gap-2">
+                <Users size={20} className="lg:w-6 lg:h-6" />
                 SQUAD STATUS
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-3 lg:space-y-4">
                 {profiles.map((profile, index) => (
                   <motion.div
                     key={profile.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 + 0.3 }}
-                    className="flex items-center gap-4 p-3 rounded-md border border-emerald-500/10 hover:border-emerald-500/30 transition-colors"
+                    className="flex items-center gap-3 lg:gap-4 p-3 rounded-md border border-emerald-500/10 hover:border-emerald-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10"
                   >
                     <StatusAvatar
                       name={profile.name}
@@ -158,9 +158,9 @@ export default function Home() {
           </motion.div>
 
           {/* Main Operations Area */}
-          <div className="col-span-9 grid grid-cols-2 gap-6">
+          <div className="lg:col-span-9 flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-6 order-1 lg:order-2">
             {/* Left Column */}
-            <div className="space-y-6">
+            <div className="space-y-4 lg:space-y-6">
               {/* Command Center */}
               <CommandCenter
                 userId={currentUserId}

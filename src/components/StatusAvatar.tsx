@@ -19,8 +19,8 @@ const statusColors = {
 export function StatusAvatar({ name, avatarUrl, status }: StatusAvatarProps) {
   return (
     <div className="relative">
-      <Avatar className="w-12 h-12 border border-[#1a1a1a]">
-        <AvatarImage src={avatarUrl} alt={name} />
+      <Avatar className="w-10 h-10 lg:w-12 lg:h-12 border border-[#1a1a1a]">
+        <AvatarImage src={avatarUrl} alt={name} className="object-cover" />
         <AvatarFallback>{name.charAt(0)}</AvatarFallback>
       </Avatar>
       <motion.div
