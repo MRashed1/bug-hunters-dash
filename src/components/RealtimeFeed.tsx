@@ -27,9 +27,9 @@ const actionStyles = {
 }
 
 const tagColors = {
-  BUG: 'text-red-400',
-  LAB: 'text-blue-400',
-  TIP: 'text-emerald-400'
+  BUG: 'text-red-500',
+  LAB: 'text-cyan-500',
+  TIP: 'text-emerald-500'
 }
 
 export function RealtimeFeed({ userId }: RealtimeFeedProps) {
@@ -90,15 +90,9 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
   // Handle prefix button click
   const handlePrefixClick = (tag: 'BUG' | 'LAB' | 'TIP') => {
     const tagText = `[${tag}] `
-    let newText = tipText
-    // If already starts with this tag, just focus and move cursor
-    if (tipText.startsWith(tagText)) {
-      newText = tipText
-    } else {
-      // Remove any existing tag at the start
-      newText = tipText.replace(/^\[(BUG|LAB|TIP)\] /, '')
-      newText = tagText + newText
-    }
+    // Remove any existing tag at the start
+    let newText = tipText.replace(/^\[(BUG|LAB|TIP)\]\s*/, '')
+    newText = tagText + newText
     setTipText(newText)
     setActiveTag(tag)
     // Focus and move cursor to end of tag
@@ -166,7 +160,7 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
                 </span>
               </div>
               <div className="text-sm font-mono">
-                <span className={tagColors[activity.action_type]}>[{activity.action_type}]</span> {activity.details}
+                <span className={tagColors[activity.action_type]}>[{activity.action_type}]</span> {activity.details.replace(/^\[(BUG|LAB|TIP)\]\s*/, '')}
               </div>
             </motion.div>
           ))}
