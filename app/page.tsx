@@ -193,17 +193,28 @@ export default function Home() {
           onClose={() => setShowSubmissionForm(false)}
         />
 
-        {/* Footer */}
-        <motion.footer
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 1 }}
-          className="mt-8 text-center"
-        >
-          <p className="text-gray-500 font-mono text-sm">
-            Secure • Encrypted • Real-time • Breach Ready
-          </p>
-        </motion.footer>
+       {/* Footer */}
+<motion.footer
+  initial={{ y: 50, opacity: 0 }}
+  animate={{ y: 0, opacity: 1 }}
+  transition={{ duration: 0.8, delay: 1 }}
+  className="mt-12 pb-8 text-center"
+>
+  <div className="group cursor-crosshair font-mono text-sm inline-block">
+    <div className="flex items-center gap-2 text-red-500">
+      <span className="font-bold drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]">
+        root@intel:~#
+      </span>  
+      <span className="text-red-400/80 group-hover:text-red-400 transition-colors">
+        created_by --author
+      </span>
+      <span className="px-2 py-0.5 bg-red-500/10 border border-red-500/20 text-red-500 font-bold shadow-[0_0_10px_rgba(239,68,68,0.1)] group-hover:bg-red-500/20 group-hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all duration-300">
+        oldrashed
+      </span>
+      <span className="animate-pulse bg-red-500 h-5 w-2 inline-block shadow-[0_0_8px_rgba(239,68,68,0.6)]"></span>
+    </div>
+  </div>
+</motion.footer>
       </div>
     </div>
   )
