@@ -1,36 +1,134 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Breach Dashboard
 
-## Getting Started
+A cyber-themed real-time hub for a 4-man bug bounty squad, built with Next.js, TypeScript, Tailwind CSS, Radix UI, Framer Motion, and Supabase.
 
-First, run the development server:
+## Features
+
+- **Real-time Status Engine**: Live status updates for squad members (HUNTING, RESEARCHING, IDLE, OFFLINE) with breathing glow animations.
+- **Session Controller**: Start/stop hunting sessions with integrated timer and progress tracking.
+- **Activity Log**: Terminal-style feed for bug discoveries, lab activities, and writeups.
+- **Shared Intelligence**: Grid of cards with tilt effects and copy-to-clipboard functionality.
+- **Responsive Design**: Ultra-dark cyber-noir theme with glassmorphism and subtle animations.
+
+## Tech Stack
+
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript (Strict mode)
+- **Styling**: Tailwind CSS + Radix UI (Primitives) + Lucide Icons
+- **Animations**: Framer Motion
+- **Backend**: Supabase (PostgreSQL + Realtime Subscriptions)
+
+## Setup Instructions
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Set up Supabase
+
+1. Create a new project at [supabase.com](https://supabase.com)
+2. Go to Settings > API to get your project URL and anon key
+3. Update `.env.local` with your Supabase credentials:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### 3. Create Database Tables
+
+Run the following SQL in your Supabase SQL Editor:
+
+```sql
+-- Create profiles table
+CREATE TABLE profiles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  avatar_url TEXT,
+  status TEXT CHECK (status IN ('HUNTING', 'RESEARCHING', 'IDLE', 'OFFLINE')) DEFAULT 'OFFLINE',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create activities table
+CREATE TABLE activities (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  action_type TEXT CHECK (action_type IN ('BUG', 'LAB', 'WRITEUP')) NOT NULL,
+  details TEXT NOT NULL,
+  timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable Row Level Security (optional, for production)
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE activities ENABLE ROW LEVEL SECURITY;
+
+-- Create policies (adjust as needed)
+CREATE POLICY "Allow all operations on profiles" ON profiles FOR ALL USING (true);
+CREATE POLICY "Allow all operations on activities" ON activities FOR ALL USING (true);
+
+-- Insert sample data (4 squad members)
+INSERT INTO profiles (name, status) VALUES
+  ('Alice', 'HUNTING'),
+  ('Bob', 'RESEARCHING'),
+  ('Charlie', 'IDLE'),
+  ('Diana', 'OFFLINE');
+```
+
+### 4. Enable Realtime
+
+In Supabase Dashboard:
+- Go to Database > Replication
+- Enable realtime for `profiles` and `activities` tables
+
+### 5. Run the Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the dashboard.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── components/
+│   ├── ui/           # Reusable UI components (Avatar, Button)
+│   ├── StatusAvatar.tsx      # Avatar with status ring
+│   ├── SessionController.tsx # Timer and session management
+│   └── RealtimeFeed.tsx      # Activity log with realtime updates
+├── lib/
+│   ├── supabase.ts   # Supabase client configuration
+│   └── utils.ts      # Utility functions (cn)
+└── types/
+    └── database.ts   # TypeScript types for database schema
 
-## Learn More
+app/
+├── globals.css       # Global styles
+├── layout.tsx        # Root layout
+└── page.tsx          # Main dashboard page
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Customization
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Colors**: Update color palette in component files (e.g., status colors in `StatusAvatar.tsx`)
+- **Animations**: Modify Framer Motion configurations for different effects
+- **Database**: Add more fields or tables as needed for your squad's workflow
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployment
 
-## Deploy on Vercel
+Deploy to Vercel, Netlify, or any platform supporting Next.js. Make sure to set environment variables in your deployment platform.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Contributing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Feel free to enhance the dashboard with additional features like:
+- User authentication
+- File uploads for reports
+- Advanced progress tracking
+- Notification system
+- Dark/light theme toggle
+
+Enjoy hunting! 🐛🔍
