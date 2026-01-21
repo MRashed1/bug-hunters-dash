@@ -16,7 +16,7 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
   const [isActive, setIsActive] = useState(false)
   const [time, setTime] = useState(0)
   const [sessionType, setSessionType] = useState<'HUNTING' | 'RESEARCHING' | null>(null)
-  const [sessionId, setSessionId] = useState<string | null>(null)
+  const [startTime, setStartTime] = useState<Date | null>(null)
 
   useEffect(() => {
     let interval: NodeJS.Timeout
@@ -31,25 +31,11 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
   const startSession = async (type: 'HUNTING' | 'RESEARCHING') => {
     setIsActive(true)
     setSessionType(type)
+    setStartTime(new Date())
     onStatusChange(type)
 
-    // Create session record
-    const supabase = getSupabase()
-    const { data, error } = await supabase
-      .from('sessions')
-      .insert({
-        user_id: userId,
-        type: type,
-        start_time: new Date().toISOString()
-      })
-      .select('id')
-      .single()
-
-    if (data) {
-      setSessionId(data.id)
-    }
-
     // Log activity to Supabase
+    const supabase = getSupabase()
     const activityDetails = type === 'HUNTING' ? 'Start Hunting' : 'Intel Gain'
     await supabase
       .from('activities')
@@ -71,23 +57,25 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
   }
 
   const stopSession = async () => {
-    if (!sessionId) return
+    if (!sessionType || !startTime) return
 
     setIsActive(false)
-    const durationMinutes = Math.floor(time / 60)
+    const endTime = new Date()
+    const durationMinutes = Math.floor((endTime.getTime() - startTime.getTime()) / (1000 * 60))
 
     const supabase = getSupabase()
     await supabase
       .from('sessions')
-      .update({
-        end_time: new Date().toISOString(),
-        duration_minutes: durationMinutes
+      .insert({
+        user_id: userId,
+        type: sessionType,
+        duration_minutes: durationMinutes,
+        end_time: endTime.toISOString()
       })
-      .eq('id', sessionId)
 
     setTime(0)
     setSessionType(null)
-    setSessionId(null)
+    setStartTime(null)
     onStatusChange('OFFLINE')
 
     await supabase
