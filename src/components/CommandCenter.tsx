@@ -126,9 +126,13 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
 
       {/* Status Display */}
       <div className="text-center mb-3 lg:mb-4">
-        <div className={`text-lg lg:text-xl font-mono ${getStatusColor()}`}>
+        <motion.div
+          animate={isActive ? { opacity: [1, 0.6, 1] } : {}}
+          transition={isActive ? { duration: 1.5, repeat: Infinity } : {}}
+          className={`text-lg lg:text-xl font-mono ${getStatusColor()}`}
+        >
           STATUS: {currentStatus}
-        </div>
+        </motion.div>
         <AnimatePresence>
           {isActive && (
             <motion.div
@@ -137,11 +141,15 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
               exit={{ scale: 0 }}
               className="mt-1 lg:mt-2"
             >
-              <div className="text-2xl lg:text-3xl font-mono text-emerald-400">
+              <motion.div
+                animate={{ opacity: [1, 0.5, 1], textShadow: ['0 0 10px rgba(16, 185, 129, 0.5)', '0 0 25px rgba(16, 185, 129, 1)', '0 0 10px rgba(16, 185, 129, 0.5)'] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="text-2xl lg:text-3xl font-mono text-emerald-400 font-bold"
+              >
                 {formatTime(time)}
-              </div>
+              </motion.div>
               <div className="text-xs lg:text-sm text-gray-400 font-mono">
-                {sessionType === 'HUNTING' ? 'LETHAL MODE' : 'INTEL MODE'}
+                {sessionType === 'HUNTING' ? 'HUNTING MODE' : 'RESEARCH MODE'}
               </div>
             </motion.div>
           )}
@@ -155,12 +163,15 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
           whileTap={{ scale: 0.95 }}
         >
           <Button
-            onClick={() => startSession('HUNTING')}
-            disabled={isActive}
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-mono py-3 px-3 lg:px-4 rounded-md transition-colors disabled:opacity-50 flex items-center justify-center gap-1 lg:gap-2 min-h-[40px] lg:min-h-[44px] text-sm lg:text-base"
+            onClick={() => isActive && sessionType === 'HUNTING' ? stopSession() : startSession('HUNTING')}
+            className={`w-full text-white font-mono py-3 px-3 lg:px-4 rounded-md transition-all flex items-center justify-center gap-1 lg:gap-2 min-h-[40px] lg:min-h-[44px] text-sm lg:text-base font-semibold ${
+              isActive && sessionType === 'HUNTING'
+                ? 'bg-red-700 hover:bg-red-800 shadow-lg shadow-red-500/50'
+                : 'bg-red-600 hover:bg-red-700'
+            }`}
           >
             <Zap size={18} className="lg:w-5 lg:h-5" />
-            GO LETHAL
+            {isActive && sessionType === 'HUNTING' ? 'STOP HUNTING' : 'START HUNTING'}
           </Button>
         </motion.div>
 
@@ -169,12 +180,15 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
           whileTap={{ scale: 0.95 }}
         >
           <Button
-            onClick={() => startSession('RESEARCHING')}
-            disabled={isActive}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-mono py-3 px-3 lg:px-4 rounded-md transition-colors disabled:opacity-50 flex items-center justify-center gap-1 lg:gap-2 min-h-[40px] lg:min-h-[44px] text-sm lg:text-base"
+            onClick={() => isActive && sessionType === 'RESEARCHING' ? stopSession() : startSession('RESEARCHING')}
+            className={`w-full text-white font-mono py-3 px-3 lg:px-4 rounded-md transition-all flex items-center justify-center gap-1 lg:gap-2 min-h-[40px] lg:min-h-[44px] text-sm lg:text-base font-semibold ${
+              isActive && sessionType === 'RESEARCHING'
+                ? 'bg-blue-700 hover:bg-blue-800 shadow-lg shadow-blue-500/50'
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
           >
             <Brain size={18} className="lg:w-5 lg:h-5" />
-            START INTEL
+            {isActive && sessionType === 'RESEARCHING' ? 'STOP RESEARCH' : 'START RESEARCH'}
           </Button>
         </motion.div>
       </div>
@@ -191,7 +205,7 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
             <Button
               onClick={pauseSession}
               variant="outline"
-              className="flex-1 border-emerald-500/20 hover:bg-emerald-500/10 font-mono py-2 lg:py-3 min-h-[40px] lg:min-h-[44px] text-sm lg:text-base"
+              className="flex-1 border-yellow-500/20 hover:bg-yellow-500/10 text-yellow-400 font-mono py-2 lg:py-3 min-h-[40px] lg:min-h-[44px] text-sm lg:text-base"
             >
               <Pause size={14} className="mr-1 lg:mr-2" />
               PAUSE
@@ -199,10 +213,10 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
             <Button
               onClick={stopSession}
               variant="outline"
-              className="flex-1 border-red-500/20 hover:bg-red-500/10 font-mono py-2 lg:py-3 min-h-[40px] lg:min-h-[44px] text-sm lg:text-base"
+              className="flex-1 border-red-500/20 hover:bg-red-500/10 text-red-400 font-mono py-2 lg:py-3 min-h-[40px] lg:min-h-[44px] text-sm lg:text-base"
             >
               <Square size={14} className="mr-1 lg:mr-2" />
-              END
+              END SESSION
             </Button>
           </motion.div>
         )}

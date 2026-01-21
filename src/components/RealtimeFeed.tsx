@@ -83,7 +83,7 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.6 }}
-      className="bg-[#0a0a0a] border border-emerald-500/20 rounded-lg p-6 backdrop-blur-md bg-opacity-10 h-full flex flex-col"
+      className="bg-[#0a0a0a] border border-emerald-500/20 rounded-lg p-6 backdrop-blur-md bg-opacity-10 flex flex-col max-h-[500px]"
     >
       <h3 className="text-lg font-semibold mb-4 text-emerald-400 font-mono flex items-center gap-2">
         <Lightbulb size={20} />
@@ -91,7 +91,7 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
       </h3>
 
       {/* Intel Input */}
-      <div className="mb-6">
+      <div className="mb-4 flex-shrink-0">
         <div className="flex gap-2">
           <textarea
             value={tipText}
@@ -102,7 +102,7 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
           />
           <Button
             onClick={submitTip}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 rounded-md transition-colors"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 rounded-md transition-colors flex-shrink-0"
           >
             <Send size={16} />
           </Button>
@@ -113,7 +113,7 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
       </div>
 
       {/* Activity Feed */}
-      <div className="flex-1 overflow-y-auto space-y-3">
+      <div className="flex-1 overflow-y-auto space-y-3 pr-2">
         <AnimatePresence>
           {activities.map((activity, index) => (
             <motion.div
@@ -122,7 +122,7 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ delay: index * 0.05 }}
-              className={`p-3 rounded-md border ${actionStyles[activity.action_type]} backdrop-blur-sm bg-opacity-50`}
+              className={`p-3 rounded-md border ${actionStyles[activity.action_type]} backdrop-blur-sm bg-opacity-50 flex-shrink-0`}
             >
               <div className="flex justify-between items-start mb-2">
                 <span className="text-xs font-mono text-gray-400">
@@ -141,7 +141,7 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
       </div>
 
       {/* Quick Actions */}
-      <div className="mt-4 pt-4 border-t border-emerald-500/20">
+      <div className="mt-4 pt-4 border-t border-emerald-500/20 flex-shrink-0">
         <div className="flex gap-2">
           <Button
             onClick={() => addActivity('BUG', 'Found critical vulnerability')}
