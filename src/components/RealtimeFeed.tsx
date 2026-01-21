@@ -26,6 +26,12 @@ const actionStyles = {
   TIP: 'text-teal-400 bg-teal-900/20 border-teal-500/20'
 }
 
+const tagColors = {
+  BUG: 'text-red-400',
+  LAB: 'text-blue-400',
+  TIP: 'text-emerald-400'
+}
+
 export function RealtimeFeed({ userId }: RealtimeFeedProps) {
   const [activities, setActivities] = useState<Activity[]>([])
   const [tipText, setTipText] = useState('')
@@ -160,7 +166,7 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
                 </span>
               </div>
               <div className="text-sm font-mono">
-                <span className="text-emerald-400">[{activity.action_type}]</span> {activity.details}
+                <span className={tagColors[activity.action_type]}>[{activity.action_type}]</span> {activity.details}
               </div>
             </motion.div>
           ))}

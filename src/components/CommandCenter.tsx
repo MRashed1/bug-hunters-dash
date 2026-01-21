@@ -17,7 +17,49 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
   const [time, setTime] = useState(0)
   const [sessionType, setSessionType] = useState<'HUNTING' | 'RESEARCHING' | null>(null)
   const [startTime, setStartTime] = useState<Date | null>(null)
+  const [sessionId, setSessionId] = useState<string | null>(null)
 
+  // Check for active session on mount
+  useEffect(() => {
+    const checkActiveSession = async () => {
+      const supabase = getSupabase()
+      const { data } = await supabase
+        .from('sessions')
+        .select('*')
+        .eq('user_id', userId)
+        .is('end_time', null)
+        .single()
+
+      if (data) {
+        setSessionId(data.id)
+        setSessionType(data.type)
+        setStartTime(new Date(data.start_time))
+        setIsActive(true)
+        onStatusChange(data.type)
+        // Calculate elapsed time
+        const elapsed = Math.floor((new Date().getTime() - new Date(data.start_time).getTime()) / 1000)
+        setTime(elapsed)
+      }
+    }
+    checkActiveSession()
+  }, [userId, onStatusChange])
+
+  // Heartbeat every 30 seconds
+  useEffect(() => {
+    if (!isActive) return
+
+    const heartbeat = setInterval(async () => {
+      const supabase = getSupabase()
+      await supabase
+        .from('profiles')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', userId)
+    }, 30000)
+
+    return () => clearInterval(heartbeat)
+  }, [isActive, userId])
+
+  // Timer
   useEffect(() => {
     let interval: NodeJS.Timeout
     if (isActive) {
@@ -29,13 +71,41 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
   }, [isActive])
 
   const startSession = async (type: 'HUNTING' | 'RESEARCHING') => {
+    const supabase = getSupabase()
+    const start = new Date()
+
+    // Insert new session
+    const { data, error } = await supabase
+      .from('sessions')
+      .insert({
+        user_id: userId,
+        type,
+        start_time: start.toISOString(),
+        end_time: null,
+        duration_minutes: null
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error starting session:', error)
+      return
+    }
+
+    setSessionId(data.id)
     setIsActive(true)
     setSessionType(type)
-    setStartTime(new Date())
+    setStartTime(start)
+    setTime(0)
     onStatusChange(type)
 
-    // Log activity to Supabase
-    const supabase = getSupabase()
+    // Update profile status
+    await supabase
+      .from('profiles')
+      .update({ status: type })
+      .eq('id', userId)
+
+    // Log activity
     const activityDetails = type === 'HUNTING' ? 'Start Hunting' : 'Intel Gain'
     await supabase
       .from('activities')
@@ -44,11 +114,6 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
         action_type: 'TIP',
         details: activityDetails
       })
-
-    await supabase
-      .from('profiles')
-      .update({ status: type })
-      .eq('id', userId)
   }
 
   const pauseSession = () => {
@@ -57,26 +122,26 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
   }
 
   const stopSession = async () => {
-    if (!sessionType || !startTime) return
+    if (!sessionId || !startTime) return
 
-    setIsActive(false)
+    const supabase = getSupabase()
     const endTime = new Date()
     const durationMinutes = Math.floor((endTime.getTime() - startTime.getTime()) / (1000 * 60))
 
-    const supabase = getSupabase()
+    // Update session
     await supabase
       .from('sessions')
-      .insert({
-        user_id: userId,
-        type: sessionType,
-        start_time: startTime.toISOString(),
-        duration_minutes: durationMinutes,
-        end_time: endTime.toISOString()
+      .update({
+        end_time: endTime.toISOString(),
+        duration_minutes: durationMinutes
       })
+      .eq('id', sessionId)
 
+    setIsActive(false)
     setTime(0)
     setSessionType(null)
     setStartTime(null)
+    setSessionId(null)
     onStatusChange('OFFLINE')
 
     await supabase
