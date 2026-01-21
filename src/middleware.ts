@@ -60,15 +60,15 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
-  // If user is not signed in and the current path is not /login, redirect to /login
-  if (!session && req.nextUrl.pathname !== '/login') {
+  // If user is not signed in and the current path is not /login or /signup, redirect to /login
+  if (!session && req.nextUrl.pathname !== '/login' && req.nextUrl.pathname !== '/signup') {
     const redirectUrl = req.nextUrl.clone()
     redirectUrl.pathname = '/login'
     return NextResponse.redirect(redirectUrl)
   }
 
-  // If user is signed in and the current path is /login, redirect to /
-  if (session && req.nextUrl.pathname === '/login') {
+  // If user is signed in and the current path is /login or /signup, redirect to /
+  if (session && (req.nextUrl.pathname === '/login' || req.nextUrl.pathname === '/signup')) {
     const redirectUrl = req.nextUrl.clone()
     redirectUrl.pathname = '/'
     return NextResponse.redirect(redirectUrl)
@@ -78,5 +78,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/login'],
+  matcher: ['/', '/login', '/signup'],
 }
