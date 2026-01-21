@@ -40,3 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 updated_sql.sql
+fix_leaderboard.sql
+supabase/migrations/20260121154735_create_leaderboard_stats_view.sql

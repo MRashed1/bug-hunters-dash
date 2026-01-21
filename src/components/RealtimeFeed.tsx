@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Lightbulb } from 'lucide-react'
 import { getSupabase } from '@/lib/supabase'
@@ -29,6 +29,8 @@ const actionStyles = {
 export function RealtimeFeed({ userId }: RealtimeFeedProps) {
   const [activities, setActivities] = useState<Activity[]>([])
   const [tipText, setTipText] = useState('')
+  const [activeTag, setActiveTag] = useState<'BUG' | 'LAB' | 'TIP' | null>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     const fetchActivities = async () => {
@@ -76,6 +78,30 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
     if (!tipText.trim()) return
     await addActivity('TIP', tipText)
     setTipText('')
+    setActiveTag(null)
+  }
+
+  // Handle prefix button click
+  const handlePrefixClick = (tag: 'BUG' | 'LAB' | 'TIP') => {
+    const tagText = `[${tag}] `
+    let newText = tipText
+    // If already starts with this tag, just focus and move cursor
+    if (tipText.startsWith(tagText)) {
+      newText = tipText
+    } else {
+      // Remove any existing tag at the start
+      newText = tipText.replace(/^\[(BUG|LAB|TIP)\] /, '')
+      newText = tagText + newText
+    }
+    setTipText(newText)
+    setActiveTag(tag)
+    // Focus and move cursor to end of tag
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus()
+        textareaRef.current.setSelectionRange(tagText.length, tagText.length)
+      }
+    }, 0)
   }
 
   return (
@@ -94,6 +120,7 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
       <div className="mb-4 flex-shrink-0">
         <div className="flex gap-2">
           <textarea
+            ref={textareaRef}
             value={tipText}
             onChange={(e) => setTipText(e.target.value)}
             placeholder="Drop a tip... (Markdown supported)"
@@ -144,26 +171,29 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
       <div className="mt-4 pt-4 border-t border-emerald-500/20 flex-shrink-0">
         <div className="flex gap-2">
           <Button
-            onClick={() => addActivity('BUG', 'Found critical vulnerability')}
+            onClick={() => handlePrefixClick('BUG')}
             size="sm"
             variant="outline"
-            className="flex-1 border-red-500/20 hover:bg-red-500/10 font-mono text-xs"
+            className={`flex-1 border-red-500/20 hover:bg-red-500/10 font-mono text-xs transition-shadow ${activeTag === 'BUG' ? 'ring-2 ring-red-400/60 shadow-red-400/30' : ''}`}
+            type="button"
           >
             + BUG
           </Button>
           <Button
-            onClick={() => addActivity('LAB', 'Testing new payload')}
+            onClick={() => handlePrefixClick('LAB')}
             size="sm"
             variant="outline"
-            className="flex-1 border-blue-500/20 hover:bg-blue-500/10 font-mono text-xs"
+            className={`flex-1 border-blue-500/20 hover:bg-blue-500/10 font-mono text-xs transition-shadow ${activeTag === 'LAB' ? 'ring-2 ring-blue-400/60 shadow-blue-400/30' : ''}`}
+            type="button"
           >
             + LAB
           </Button>
           <Button
-            onClick={() => addActivity('TIP', 'Completed detailed writeup')}
+            onClick={() => handlePrefixClick('TIP')}
             size="sm"
             variant="outline"
-            className="flex-1 border-teal-500/20 hover:bg-teal-500/10 font-mono text-xs"
+            className={`flex-1 border-teal-500/20 hover:bg-teal-500/10 font-mono text-xs transition-shadow ${activeTag === 'TIP' ? 'ring-2 ring-teal-400/60 shadow-teal-400/30' : ''}`}
+            type="button"
           >
             + TIP
           </Button>
