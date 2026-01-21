@@ -16,6 +16,7 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
   const [isActive, setIsActive] = useState(false)
   const [time, setTime] = useState(0)
   const [sessionType, setSessionType] = useState<'HUNTING' | 'RESEARCHING' | null>(null)
+  const [sessionId, setSessionId] = useState<string | null>(null)
 
   useEffect(() => {
     let interval: NodeJS.Timeout
@@ -32,9 +33,25 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
     setSessionType(type)
     onStatusChange(type)
 
+    // Create session record
+    const supabase = getSupabase()
+    const { data, error } = await supabase
+      .from('sessions')
+      .insert({
+        user_id: userId,
+        type: type,
+        start_time: new Date().toISOString()
+      })
+      .select('id')
+      .single()
+
+    if (data) {
+      setSessionId(data.id)
+    }
+
     // Log activity to Supabase
     const activityDetails = type === 'HUNTING' ? 'Start Hunting' : 'Intel Gain'
-    await (getSupabase() as any)
+    await supabase
       .from('activities')
       .insert({
         user_id: userId,
@@ -42,7 +59,7 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
         details: activityDetails
       })
 
-    await (getSupabase() as any)
+    await supabase
       .from('profiles')
       .update({ status: type })
       .eq('id', userId)
@@ -54,12 +71,26 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
   }
 
   const stopSession = async () => {
+    if (!sessionId) return
+
     setIsActive(false)
+    const durationMinutes = Math.floor(time / 60)
+
+    const supabase = getSupabase()
+    await supabase
+      .from('sessions')
+      .update({
+        end_time: new Date().toISOString(),
+        duration_minutes: durationMinutes
+      })
+      .eq('id', sessionId)
+
     setTime(0)
     setSessionType(null)
+    setSessionId(null)
     onStatusChange('OFFLINE')
 
-    await (getSupabase() as any)
+    await supabase
       .from('profiles')
       .update({ status: 'OFFLINE' })
       .eq('id', userId)

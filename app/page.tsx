@@ -6,6 +6,7 @@ import { StatusAvatar } from '@/components/StatusAvatar'
 import { CommandCenter } from '@/components/CommandCenter'
 import { RealtimeFeed } from '@/components/RealtimeFeed'
 import { SubmissionForm } from '@/components/SubmissionForm'
+import { Leaderboard } from '@/components/Leaderboard'
 import { getSupabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Plus, Users, LogOut } from 'lucide-react'
@@ -157,16 +158,25 @@ export default function Home() {
           </motion.div>
 
           {/* Main Operations Area */}
-          <div className="col-span-9 space-y-6">
-            {/* Command Center */}
-            <CommandCenter
-              userId={currentUserId}
-              currentStatus={currentStatus}
-              onStatusChange={handleStatusChange}
-            />
+          <div className="col-span-9 grid grid-cols-2 gap-6">
+            {/* Left Column */}
+            <div className="space-y-6">
+              {/* Command Center */}
+              <CommandCenter
+                userId={currentUserId}
+                currentStatus={currentStatus}
+                onStatusChange={handleStatusChange}
+              />
 
-            {/* Intel Feed */}
-            <RealtimeFeed userId={currentUserId} />
+              {/* Intel Feed */}
+              <RealtimeFeed userId={currentUserId} />
+            </div>
+
+            {/* Right Column */}
+            <div>
+              {/* Leaderboard */}
+              <Leaderboard />
+            </div>
           </div>
         </div>
 

@@ -61,9 +61,44 @@ export interface Database {
           created_at?: string
         }
       }
+      sessions: {
+        Row: {
+          id: string
+          user_id: string
+          type: 'HUNTING' | 'RESEARCHING'
+          start_time: string
+          end_time: string | null
+          duration_minutes: number | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: 'HUNTING' | 'RESEARCHING'
+          start_time?: string
+          end_time?: string | null
+          duration_minutes?: number | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: 'HUNTING' | 'RESEARCHING'
+          start_time?: string
+          end_time?: string | null
+          duration_minutes?: number | null
+        }
+      }
     }
     Views: {
-      [_ in never]: never
+      leaderboard_stats: {
+        Row: {
+          user_id: string
+          name: string
+          avatar_url: string | null
+          hunting_hours: number
+          researching_hours: number
+          bug_count: number
+        }
+      }
     }
     Functions: {
       [_ in never]: never
