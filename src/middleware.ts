@@ -46,9 +46,10 @@ export async function middleware(req: NextRequest) {
               headers: req.headers,
             },
           })
-          response.cookies.remove({
+          response.cookies.set({
             name,
             value: '',
+            expires: new Date(0),
             ...options,
           })
         },
@@ -74,7 +75,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  return res
+  return response
 }
 
 export const config = {
