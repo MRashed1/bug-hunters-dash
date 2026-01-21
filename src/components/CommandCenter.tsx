@@ -118,15 +118,15 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="bg-[#0a0a0a] border border-emerald-500/20 rounded-lg p-4 lg:p-6 backdrop-blur-md bg-opacity-10"
+      className="bg-[#0a0a0a] border border-emerald-500/20 rounded-lg p-3 lg:p-4 backdrop-blur-md bg-opacity-10"
     >
-      <h2 className="text-lg lg:text-xl font-bold text-emerald-400 mb-4 lg:mb-6 font-mono text-center">
+      <h2 className="text-base lg:text-lg font-bold text-emerald-400 mb-3 lg:mb-4 font-mono text-center">
         COMMAND CENTER
       </h2>
 
       {/* Status Display */}
-      <div className="text-center mb-4 lg:mb-6">
-        <div className={`text-xl lg:text-2xl font-mono ${getStatusColor()}`}>
+      <div className="text-center mb-3 lg:mb-4">
+        <div className={`text-lg lg:text-xl font-mono ${getStatusColor()}`}>
           STATUS: {currentStatus}
         </div>
         <AnimatePresence>
@@ -135,12 +135,12 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="mt-2"
+              className="mt-1 lg:mt-2"
             >
-              <div className="text-3xl lg:text-4xl font-mono text-emerald-400">
+              <div className="text-2xl lg:text-3xl font-mono text-emerald-400">
                 {formatTime(time)}
               </div>
-              <div className="text-sm text-gray-400 font-mono">
+              <div className="text-xs lg:text-sm text-gray-400 font-mono">
                 {sessionType === 'HUNTING' ? 'LETHAL MODE' : 'INTEL MODE'}
               </div>
             </motion.div>
@@ -149,7 +149,7 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
       </div>
 
       {/* Control Buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4 mb-4 lg:mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 lg:gap-3 mb-3 lg:mb-4">
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -157,9 +157,9 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
           <Button
             onClick={() => startSession('HUNTING')}
             disabled={isActive}
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-mono py-4 px-4 rounded-md transition-colors disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px] text-sm lg:text-base"
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-mono py-3 px-3 lg:px-4 rounded-md transition-colors disabled:opacity-50 flex items-center justify-center gap-1 lg:gap-2 min-h-[40px] lg:min-h-[44px] text-sm lg:text-base"
           >
-            <Zap size={20} />
+            <Zap size={18} className="lg:w-5 lg:h-5" />
             GO LETHAL
           </Button>
         </motion.div>
@@ -171,9 +171,9 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
           <Button
             onClick={() => startSession('RESEARCHING')}
             disabled={isActive}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-mono py-4 px-4 rounded-md transition-colors disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px] text-sm lg:text-base"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-mono py-3 px-3 lg:px-4 rounded-md transition-colors disabled:opacity-50 flex items-center justify-center gap-1 lg:gap-2 min-h-[40px] lg:min-h-[44px] text-sm lg:text-base"
           >
-            <Brain size={20} />
+            <Brain size={18} className="lg:w-5 lg:h-5" />
             START INTEL
           </Button>
         </motion.div>
@@ -191,17 +191,17 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
             <Button
               onClick={pauseSession}
               variant="outline"
-              className="flex-1 border-emerald-500/20 hover:bg-emerald-500/10 font-mono py-3 min-h-[44px] text-sm lg:text-base"
+              className="flex-1 border-emerald-500/20 hover:bg-emerald-500/10 font-mono py-2 lg:py-3 min-h-[40px] lg:min-h-[44px] text-sm lg:text-base"
             >
-              <Pause size={16} className="mr-2" />
+              <Pause size={14} className="mr-1 lg:mr-2" />
               PAUSE
             </Button>
             <Button
               onClick={stopSession}
               variant="outline"
-              className="flex-1 border-red-500/20 hover:bg-red-500/10 font-mono py-3 min-h-[44px] text-sm lg:text-base"
+              className="flex-1 border-red-500/20 hover:bg-red-500/10 font-mono py-2 lg:py-3 min-h-[40px] lg:min-h-[44px] text-sm lg:text-base"
             >
-              <Square size={16} className="mr-2" />
+              <Square size={14} className="mr-1 lg:mr-2" />
               END
             </Button>
           </motion.div>

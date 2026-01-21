@@ -84,7 +84,7 @@ export default function Home() {
       <div className="fixed inset-0 bg-gradient-to-br from-emerald-900/10 via-transparent to-blue-900/10" />
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.05),transparent_50%)]" />
 
-      <div className="relative z-10 p-4 lg:p-6 min-h-screen flex flex-col">
+      <div className="relative z-10 p-4 lg:p-6 min-h-screen flex flex-col max-w-7xl mx-auto w-full">
         {/* Header */}
         <motion.header
           initial={{ y: -50, opacity: 0 }}
@@ -119,16 +119,16 @@ export default function Home() {
           </div>
         </motion.header>
 
-        {/* Main Grid - Zero-G Layout */}
-        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-6">
-          {/* Squad Status - Floating Panel */}
+        {/* Main Grid - Bento Layout */}
+        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-6">
+          {/* Squad Status - Left Panel */}
           <motion.div
             initial={{ x: -100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="lg:col-span-3 order-2 lg:order-1"
+            className="lg:col-span-3 order-3 lg:order-1 h-full"
           >
-            <div className="bg-[#0a0a0a] border border-emerald-500/20 rounded-lg p-4 lg:p-6 backdrop-blur-md bg-opacity-10 sticky top-6">
+            <div className="bg-[#0a0a0a] border border-emerald-500/20 rounded-lg p-4 lg:p-6 backdrop-blur-md bg-opacity-10 h-full">
               <h2 className="text-lg lg:text-xl font-bold text-emerald-400 mb-4 lg:mb-6 font-mono flex items-center gap-2">
                 <Users size={20} className="lg:w-6 lg:h-6" />
                 SQUAD STATUS
@@ -157,27 +157,33 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* Main Operations Area */}
-          <div className="lg:col-span-9 flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-6 order-1 lg:order-2">
-            {/* Left Column */}
-            <div className="space-y-4 lg:space-y-6">
-              {/* Command Center */}
-              <CommandCenter
-                userId={currentUserId}
-                currentStatus={currentStatus}
-                onStatusChange={handleStatusChange}
-              />
+          {/* Center Column - Command Center + Intel Feed */}
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="lg:col-span-5 order-1 lg:order-2 space-y-4 lg:space-y-6 h-full"
+          >
+            {/* Command Center */}
+            <CommandCenter
+              userId={currentUserId}
+              currentStatus={currentStatus}
+              onStatusChange={handleStatusChange}
+            />
 
-              {/* Intel Feed */}
-              <RealtimeFeed userId={currentUserId} />
-            </div>
+            {/* Intel Feed */}
+            <RealtimeFeed userId={currentUserId} />
+          </motion.div>
 
-            {/* Right Column */}
-            <div>
-              {/* Leaderboard */}
-              <Leaderboard />
-            </div>
-          </div>
+          {/* Leaderboard - Right Panel */}
+          <motion.div
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="lg:col-span-4 order-2 lg:order-3 h-full"
+          >
+            <Leaderboard />
+          </motion.div>
         </div>
 
         {/* Submission Form Modal */}

@@ -98,7 +98,7 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
             onChange={(e) => setTipText(e.target.value)}
             placeholder="Drop a tip... (Markdown supported)"
             rows={3}
-            className="flex-1 px-4 py-3 bg-[#1a1a1a] border border-emerald-500/20 rounded-md text-white placeholder-gray-500 focus:border-emerald-400 focus:outline-none transition-colors font-mono resize-none"
+            className="flex-1 px-4 py-3 bg-[#1a1a1a] border border-emerald-500/20 rounded-md text-white placeholder-gray-500 focus:border-emerald-400 focus:outline-none transition-colors font-mono resize-none max-h-32 overflow-y-auto"
           />
           <Button
             onClick={submitTip}

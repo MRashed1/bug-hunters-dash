@@ -131,19 +131,19 @@ export function Leaderboard() {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="bg-[#050505] border border-gray-800/50 rounded-lg p-4 lg:p-6 backdrop-blur-md bg-opacity-95"
+      className="bg-[#050505] border border-gray-800/50 rounded-lg p-3 lg:p-4 backdrop-blur-md bg-opacity-95 h-full flex flex-col"
     >
-      <h2 className="text-lg lg:text-xl font-bold text-emerald-400 mb-4 lg:mb-6 font-mono text-center">
+      <h2 className="text-base lg:text-lg font-bold text-emerald-400 mb-3 lg:mb-4 font-mono text-center">
         SQUAD LEADERBOARD
       </h2>
 
       {/* Tab Switcher */}
-      <div className="flex gap-1 lg:gap-2 mb-4 lg:mb-6 overflow-x-auto">
+      <div className="flex gap-1 mb-3 lg:mb-4 overflow-x-auto">
         {(['HUNTING', 'RESEARCH', 'BUGS'] as TabType[]).map((tab) => (
           <motion.button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex-1 min-w-0 py-3 lg:py-2 px-3 lg:px-4 rounded-md font-mono text-xs lg:text-sm transition-all duration-300 flex items-center justify-center gap-1 lg:gap-2 min-h-[44px] ${
+            className={`flex-1 min-w-0 py-2 px-2 lg:px-3 rounded-md font-mono text-xs transition-all duration-300 flex items-center justify-center gap-1 min-h-[36px] ${
               activeTab === tab
                 ? `bg-${color}-500/20 border border-${color}-500/50 text-${color}-400 shadow-lg shadow-${color}-500/20`
                 : 'bg-gray-800/50 border border-gray-700/50 text-gray-400 hover:bg-gray-700/50'
@@ -152,13 +152,14 @@ export function Leaderboard() {
             whileTap={{ scale: 0.98 }}
           >
             {getTabIcon(tab)}
-            <span className="truncate">{tab}</span>
+            <span className="hidden sm:inline truncate">{tab}</span>
+            <span className="sm:hidden">{tab.charAt(0)}</span>
           </motion.button>
         ))}
       </div>
 
       {/* Leaderboard List */}
-      <div className="space-y-2 lg:space-y-3 max-h-96 overflow-y-auto">
+      <div className="flex-1 space-y-2 overflow-y-auto">
         <AnimatePresence mode="popLayout">
           {loading ? (
             // Loading skeletons
@@ -169,14 +170,14 @@ export function Leaderboard() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ delay: i * 0.1 }}
-                className="flex items-center gap-3 lg:gap-4 p-3 lg:p-4 bg-gray-900/50 border border-gray-800/50 rounded-lg animate-pulse"
+                className="flex items-center gap-2 lg:gap-3 p-2 lg:p-3 bg-gray-900/50 border border-gray-800/50 rounded-lg animate-pulse"
               >
-                <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gray-700 rounded-full"></div>
+                <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gray-700 rounded-full"></div>
                 <div className="flex-1">
-                  <div className="h-3 lg:h-4 bg-gray-700 rounded mb-1 lg:mb-2"></div>
+                  <div className="h-3 lg:h-4 bg-gray-700 rounded mb-1"></div>
                   <div className="h-2 lg:h-3 bg-gray-700 rounded w-1/2"></div>
                 </div>
-                <div className="w-12 lg:w-16 h-4 lg:h-6 bg-gray-700 rounded"></div>
+                <div className="w-10 lg:w-12 h-3 lg:h-4 bg-gray-700 rounded"></div>
               </motion.div>
             ))
           ) : (
@@ -188,14 +189,14 @@ export function Leaderboard() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.3 }}
-                className={`flex items-center gap-3 lg:gap-4 p-3 lg:p-4 bg-gray-900/50 border rounded-lg backdrop-blur-sm cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-${color}-500/20 min-h-[60px] ${
+                className={`flex items-center gap-2 lg:gap-3 p-2 lg:p-3 bg-gray-900/50 border rounded-lg backdrop-blur-sm cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-${color}-500/20 ${
                   index < 3 ? `border-${color}-500/30 shadow-lg shadow-${color}-500/10` : 'border-gray-800/50'
                 }`}
               >
-                <div className="flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10">
+                <div className="flex items-center justify-center w-6 h-6 lg:w-8 lg:h-8">
                   {getRankIcon(index)}
                 </div>
-                <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gray-700 rounded-full overflow-hidden flex-shrink-0">
+                <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gray-700 rounded-full overflow-hidden flex-shrink-0">
                   {entry.avatar_url ? (
                     <img src={entry.avatar_url} alt={entry.name} className="w-full h-full object-cover" />
                   ) : (
@@ -205,14 +206,14 @@ export function Leaderboard() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-mono text-white text-sm truncate">{entry.name}</div>
+                  <div className="font-mono text-white text-xs lg:text-sm truncate">{entry.name}</div>
                   <div className="text-xs text-gray-400 hidden sm:block">
                     {activeTab === 'HUNTING' && `Research: ${entry.researching_hours.toFixed(1)}hrs | Bugs: ${entry.bug_count}`}
                     {activeTab === 'RESEARCH' && `Hunting: ${entry.hunting_hours.toFixed(1)}hrs | Bugs: ${entry.bug_count}`}
                     {activeTab === 'BUGS' && `Hunting: ${entry.hunting_hours.toFixed(1)}hrs | Research: ${entry.researching_hours.toFixed(1)}hrs`}
                   </div>
                 </div>
-                <div className={`font-mono text-base lg:text-lg text-${color}-400 flex-shrink-0`}>
+                <div className={`font-mono text-sm lg:text-base text-${color}-400 flex-shrink-0 text-right`}>
                   {getValue(entry)} <span className="text-xs text-gray-400">{getUnit()}</span>
                 </div>
               </motion.div>
