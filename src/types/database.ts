@@ -15,6 +15,8 @@ export interface Database {
           name: string
           avatar_url: string | null
           status: 'HUNTING' | 'RESEARCHING' | 'IDLE' | 'OFFLINE'
+          role: 'user' | 'admin'
+          banned: boolean
           created_at: string
           updated_at: string
         }
@@ -23,6 +25,8 @@ export interface Database {
           name: string
           avatar_url?: string | null
           status?: 'HUNTING' | 'RESEARCHING' | 'IDLE' | 'OFFLINE'
+          role?: 'user' | 'admin'
+          banned?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -31,6 +35,8 @@ export interface Database {
           name?: string
           avatar_url?: string | null
           status?: 'HUNTING' | 'RESEARCHING' | 'IDLE' | 'OFFLINE'
+          role?: 'user' | 'admin'
+          banned?: boolean
           created_at?: string
           updated_at?: string
         }

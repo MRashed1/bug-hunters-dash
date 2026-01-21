@@ -42,7 +42,8 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
     const fetchActivities = async () => {
       const { data } = await (getSupabase() as any)
         .from('activities')
-        .select('*, profiles(name)')
+        .select('*, profiles!inner(name)')
+        .eq('profiles.banned', false)
         .order('created_at', { ascending: false })
         .limit(50)
       if (data) setActivities(data)
@@ -58,9 +59,10 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
         async (payload: { new: any }) => {
           const { data: profile } = await (getSupabase() as any)
             .from('profiles')
-            .select('name')
+            .select('name, banned')
             .eq('id', payload.new.user_id)
             .single()
+          if (profile?.banned) return
           const newActivity = { ...payload.new, profiles: profile || { name: 'Unknown' } }
           setActivities((prev) => [newActivity, ...prev.slice(0, 49)])
         }

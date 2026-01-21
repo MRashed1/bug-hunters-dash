@@ -9,7 +9,7 @@ import { SubmissionForm } from '@/components/SubmissionForm'
 import { Leaderboard } from '@/components/Leaderboard'
 import { getSupabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
-import { Plus, Users, LogOut } from 'lucide-react'
+import { Plus, Users, LogOut, Shield } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 type Profile = {
@@ -17,12 +17,15 @@ type Profile = {
   name: string
   avatar_url: string | null
   status: 'HUNTING' | 'RESEARCHING' | 'IDLE' | 'OFFLINE'
+  role: 'user' | 'admin'
+  banned: boolean
 }
 
 export default function Home() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [currentStatus, setCurrentStatus] = useState('OFFLINE')
+  const [currentRole, setCurrentRole] = useState<'user' | 'admin'>('user')
   const [showSubmissionForm, setShowSubmissionForm] = useState(false)
   const router = useRouter()
 
@@ -31,6 +34,12 @@ export default function Home() {
       const { data: { user } } = await (getSupabase() as any).auth.getUser()
       if (user) {
         setCurrentUserId(user.id)
+        const { data: profile } = await (getSupabase() as any)
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+        if (profile) setCurrentRole(profile.role)
       } else {
         router.push('/login')
       }
@@ -101,6 +110,15 @@ export default function Home() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+            {currentRole === 'admin' && (
+              <Button
+                onClick={() => router.push('/admin')}
+                className="bg-red-600 hover:bg-red-700 text-white font-mono px-4 lg:px-6 py-3 rounded-md transition-colors flex items-center justify-center gap-2 min-h-[44px]"
+              >
+                <Shield size={20} />
+                ADMIN
+              </Button>
+            )}
             <Button
               onClick={() => setShowSubmissionForm(true)}
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-mono px-4 lg:px-6 py-3 rounded-md transition-colors flex items-center justify-center gap-2 min-h-[44px]"

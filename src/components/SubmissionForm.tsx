@@ -33,6 +33,19 @@ export function SubmissionForm({ userId, isOpen, onClose }: SubmissionFormProps)
     setIsSubmitting(true)
 
     try {
+      // Check if user is banned
+      const { data: profile } = await (getSupabase() as any)
+        .from('profiles')
+        .select('banned')
+        .eq('id', userId)
+        .single()
+
+      if (profile?.banned) {
+        alert('You are banned and cannot submit findings.')
+        setIsSubmitting(false)
+        return
+      }
+
       // Insert into activities table
       await (getSupabase() as any).from('activities').insert({
         user_id: userId,

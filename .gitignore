@@ -42,3 +42,5 @@ next-env.d.ts
 updated_sql.sql
 fix_leaderboard.sql
 supabase/migrations/20260121154735_create_leaderboard_stats_view.sql
+supabase/migrations/20260121160000_add_admin_fields.sql
+supabase/migrations/20260121170000_update_leaderboard_view.sql
