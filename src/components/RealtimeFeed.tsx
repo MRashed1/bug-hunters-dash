@@ -82,7 +82,9 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
 
   const submitTip = async () => {
     if (!tipText.trim()) return
-    await addActivity('TIP', tipText)
+    const tagMatch = tipText.match(/^\[(BUG|LAB|TIP)\]/)
+    const actionType = tagMatch ? tagMatch[1] as 'BUG' | 'LAB' | 'TIP' : 'TIP'
+    await addActivity(actionType, tipText)
     setTipText('')
     setActiveTag(null)
   }
