@@ -163,7 +163,7 @@ export default function LoginPage() {
               </Link>
             </p>
             <p className="text-gray-500 text-sm font-mono">
-              <Link href="/forgot-password" className="text-emerald-400 hover:text-emerald-300 transition-colors">
+              <Link href="/reset-password" className="text-emerald-400 hover:text-emerald-300 transition-colors">
                 Forgot your password?
               </Link>
             </p>

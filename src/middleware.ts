@@ -61,15 +61,15 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
-  // If user is not signed in and the current path is not /login, /signup, /forgot-password, or /reset-password, redirect to /login
-  if (!session && req.nextUrl.pathname !== '/login' && req.nextUrl.pathname !== '/signup' && req.nextUrl.pathname !== '/forgot-password' && req.nextUrl.pathname !== '/reset-password') {
+  // If user is not signed in and the current path is not /login, /signup, or /reset-password, redirect to /login
+  if (!session && req.nextUrl.pathname !== '/login' && req.nextUrl.pathname !== '/signup' && req.nextUrl.pathname !== '/reset-password') {
     const redirectUrl = req.nextUrl.clone()
     redirectUrl.pathname = '/login'
     return NextResponse.redirect(redirectUrl)
   }
 
-  // If user is signed in and the current path is /login, /signup, /forgot-password, or /reset-password, redirect to /
-  if (session && (req.nextUrl.pathname === '/login' || req.nextUrl.pathname === '/signup' || req.nextUrl.pathname === '/forgot-password' || req.nextUrl.pathname === '/reset-password')) {
+  // If user is signed in and the current path is /login, /signup, or /reset-password, redirect to /
+  if (session && (req.nextUrl.pathname === '/login' || req.nextUrl.pathname === '/signup' || req.nextUrl.pathname === '/reset-password')) {
     const redirectUrl = req.nextUrl.clone()
     redirectUrl.pathname = '/'
     return NextResponse.redirect(redirectUrl)
@@ -79,5 +79,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/login', '/signup', '/forgot-password', '/reset-password'],
+  matcher: ['/', '/login', '/signup', '/reset-password'],
 }
