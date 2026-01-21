@@ -14,6 +14,9 @@ type Profile = {
   status: 'HUNTING' | 'RESEARCHING' | 'IDLE' | 'OFFLINE'
   role: 'user' | 'admin'
   banned: boolean
+  bonus_hunting_hours: number
+  bonus_researching_hours: number
+  bonus_bug_count: number
 }
 
 type Activity = {
@@ -29,6 +32,7 @@ export default function AdminPage() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [activities, setActivities] = useState<Activity[]>([])
   const [currentUser, setCurrentUser] = useState<Profile | null>(null)
+  const [editingBonuses, setEditingBonuses] = useState<{ [key: string]: Partial<Profile> }>({})
   const router = useRouter()
 
   useEffect(() => {
@@ -104,6 +108,13 @@ export default function AdminPage() {
       .eq('id', userId)
   }
 
+  const handleBonusUpdate = async (userId: string, field: keyof Profile, value: number) => {
+    await (getSupabase() as any)
+      .from('profiles')
+      .update({ [field]: value })
+      .eq('id', userId)
+  }
+
   const handleDeleteActivity = async (activityId: string) => {
     await (getSupabase() as any)
       .from('activities')
@@ -164,32 +175,82 @@ export default function AdminPage() {
           </h2>
           <div className="space-y-4 max-h-[400px] overflow-y-auto">
             {profiles.map((profile) => (
-              <div key={profile.id} className="flex items-center justify-between p-4 border border-red-500/10 rounded-md hover:border-red-500/30 transition-all">
-                <div className="flex items-center gap-4">
-                  <div>
-                    <div className="font-mono text-red-400">{profile.name}</div>
-                    <div className="font-mono text-xs text-gray-500">{profile.status} • {profile.role}</div>
-                    {profile.banned && <div className="text-red-500 font-mono text-xs">BANNED</div>}
+              <div key={profile.id}>
+                <div className="flex items-center justify-between p-4 border border-red-500/10 rounded-md hover:border-red-500/30 transition-all">
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <div className="font-mono text-red-400">{profile.name}</div>
+                      <div className="font-mono text-xs text-gray-500">{profile.status} • {profile.role}</div>
+                      <div className="font-mono text-xs text-gray-600">
+                        Bonuses: H:{profile.bonus_hunting_hours} R:{profile.bonus_researching_hours} B:{profile.bonus_bug_count}
+                      </div>
+                      {profile.banned && <div className="text-red-500 font-mono text-xs">BANNED</div>}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => handleRoleChange(profile.id, profile.role === 'admin' ? 'user' : 'admin')}
+                      variant="outline"
+                      size="sm"
+                      className="border-purple-500/20 hover:bg-purple-500/10 text-purple-400"
+                    >
+                      {profile.role === 'admin' ? 'Demote' : 'Promote'}
+                    </Button>
+                    <Button
+                      onClick={() => handleBanToggle(profile.id, profile.banned)}
+                      variant="outline"
+                      size="sm"
+                      className={`border-${profile.banned ? 'green' : 'red'}-500/20 hover:bg-${profile.banned ? 'green' : 'red'}-500/10 text-${profile.banned ? 'green' : 'red'}-400`}
+                    >
+                      {profile.banned ? <UserCheck size={16} /> : <Ban size={16} />}
+                      {profile.banned ? 'Unban' : 'Ban'}
+                    </Button>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => handleRoleChange(profile.id, profile.role === 'admin' ? 'user' : 'admin')}
-                    variant="outline"
-                    size="sm"
-                    className="border-purple-500/20 hover:bg-purple-500/10 text-purple-400"
-                  >
-                    {profile.role === 'admin' ? 'Demote' : 'Promote'}
-                  </Button>
-                  <Button
-                    onClick={() => handleBanToggle(profile.id, profile.banned)}
-                    variant="outline"
-                    size="sm"
-                    className={`border-${profile.banned ? 'green' : 'red'}-500/20 hover:bg-${profile.banned ? 'green' : 'red'}-500/10 text-${profile.banned ? 'green' : 'red'}-400`}
-                  >
-                    {profile.banned ? <UserCheck size={16} /> : <Ban size={16} />}
-                    {profile.banned ? 'Unban' : 'Ban'}
-                  </Button>
+                {/* Bonus Adjustments */}
+                <div className="ml-8 p-3 border-l border-red-500/20 bg-red-900/5 rounded-r-md">
+                  <div className="text-sm font-mono text-gray-400 mb-2">Bonus Adjustments</div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs text-gray-500">Hunting Hours</label>
+                      <input
+                        type="number"
+                        value={editingBonuses[profile.id]?.bonus_hunting_hours ?? profile.bonus_hunting_hours}
+                        onChange={(e) => setEditingBonuses(prev => ({
+                          ...prev,
+                          [profile.id]: { ...prev[profile.id], bonus_hunting_hours: parseInt(e.target.value) || 0 }
+                        }))}
+                        onBlur={() => handleBonusUpdate(profile.id, 'bonus_hunting_hours', editingBonuses[profile.id]?.bonus_hunting_hours ?? profile.bonus_hunting_hours)}
+                        className="w-full bg-gray-800 border border-red-500/20 rounded px-2 py-1 text-xs font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500">Researching Hours</label>
+                      <input
+                        type="number"
+                        value={editingBonuses[profile.id]?.bonus_researching_hours ?? profile.bonus_researching_hours}
+                        onChange={(e) => setEditingBonuses(prev => ({
+                          ...prev,
+                          [profile.id]: { ...prev[profile.id], bonus_researching_hours: parseInt(e.target.value) || 0 }
+                        }))}
+                        onBlur={() => handleBonusUpdate(profile.id, 'bonus_researching_hours', editingBonuses[profile.id]?.bonus_researching_hours ?? profile.bonus_researching_hours)}
+                        className="w-full bg-gray-800 border border-red-500/20 rounded px-2 py-1 text-xs font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500">Bug Count</label>
+                      <input
+                        type="number"
+                        value={editingBonuses[profile.id]?.bonus_bug_count ?? profile.bonus_bug_count}
+                        onChange={(e) => setEditingBonuses(prev => ({
+                          ...prev,
+                          [profile.id]: { ...prev[profile.id], bonus_bug_count: parseInt(e.target.value) || 0 }
+                        }))}
+                        onBlur={() => handleBonusUpdate(profile.id, 'bonus_bug_count', editingBonuses[profile.id]?.bonus_bug_count ?? profile.bonus_bug_count)}
+                        className="w-full bg-gray-800 border border-red-500/20 rounded px-2 py-1 text-xs font-mono"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}

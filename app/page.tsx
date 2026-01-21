@@ -19,6 +19,9 @@ type Profile = {
   status: 'HUNTING' | 'RESEARCHING' | 'IDLE' | 'OFFLINE'
   role: 'user' | 'admin'
   banned: boolean
+  bonus_hunting_hours: number
+  bonus_researching_hours: number
+  bonus_bug_count: number
 }
 
 export default function Home() {

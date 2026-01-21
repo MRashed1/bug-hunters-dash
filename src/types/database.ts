@@ -17,6 +17,9 @@ export interface Database {
           status: 'HUNTING' | 'RESEARCHING' | 'IDLE' | 'OFFLINE'
           role: 'user' | 'admin'
           banned: boolean
+          bonus_hunting_hours: number
+          bonus_researching_hours: number
+          bonus_bug_count: number
           created_at: string
           updated_at: string
         }
@@ -27,6 +30,9 @@ export interface Database {
           status?: 'HUNTING' | 'RESEARCHING' | 'IDLE' | 'OFFLINE'
           role?: 'user' | 'admin'
           banned?: boolean
+          bonus_hunting_hours?: number
+          bonus_researching_hours?: number
+          bonus_bug_count?: number
           created_at?: string
           updated_at?: string
         }
@@ -37,6 +43,9 @@ export interface Database {
           status?: 'HUNTING' | 'RESEARCHING' | 'IDLE' | 'OFFLINE'
           role?: 'user' | 'admin'
           banned?: boolean
+          bonus_hunting_hours?: number
+          bonus_researching_hours?: number
+          bonus_bug_count?: number
           created_at?: string
           updated_at?: string
         }
