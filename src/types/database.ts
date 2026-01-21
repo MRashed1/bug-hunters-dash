@@ -39,23 +39,26 @@ export interface Database {
         Row: {
           id: string
           user_id: string
-          action_type: 'BUG' | 'LAB' | 'WRITEUP'
+          action_type: 'BUG' | 'LAB' | 'TIP'
           details: string
-          timestamp: string
+          link: string | null
+          created_at: string
         }
         Insert: {
           id?: string
           user_id: string
-          action_type: 'BUG' | 'LAB' | 'WRITEUP'
+          action_type: 'BUG' | 'LAB' | 'TIP'
           details: string
-          timestamp?: string
+          link?: string | null
+          created_at?: string
         }
         Update: {
           id?: string
           user_id?: string
-          action_type?: 'BUG' | 'LAB' | 'WRITEUP'
+          action_type?: 'BUG' | 'LAB' | 'TIP'
           details?: string
-          timestamp?: string
+          link?: string | null
+          created_at?: string
         }
       }
     }

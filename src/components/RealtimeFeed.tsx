@@ -2,10 +2,17 @@
 
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Send, Lightbulb } from 'lucide-react'
 import { getSupabase } from '@/lib/supabase'
-import { Database } from '@/types/database'
+import { Button } from '@/components/ui/button'
 
-type Activity = Database['public']['Tables']['activities']['Row'] & {
+type Activity = {
+  id: string
+  user_id: string
+  action_type: 'BUG' | 'LAB' | 'TIP'
+  details: string
+  link: string | null
+  created_at: string
   profiles: { name: string } | null
 }
 
@@ -14,21 +21,21 @@ interface RealtimeFeedProps {
 }
 
 const actionStyles = {
-  BUG: 'text-red-400 bg-red-900/20',
-  LAB: 'text-blue-400 bg-blue-900/20',
-  WRITEUP: 'text-teal-400 bg-teal-900/20',
+  BUG: 'text-red-400 bg-red-900/20 border-red-500/20',
+  LAB: 'text-blue-400 bg-blue-900/20 border-blue-500/20',
+  TIP: 'text-teal-400 bg-teal-900/20 border-teal-500/20'
 }
 
 export function RealtimeFeed({ userId }: RealtimeFeedProps) {
   const [activities, setActivities] = useState<Activity[]>([])
+  const [tipText, setTipText] = useState('')
 
   useEffect(() => {
-    // Fetch initial activities
     const fetchActivities = async () => {
       const { data } = await (getSupabase() as any)
         .from('activities')
         .select('*, profiles(name)')
-        .order('timestamp', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(50)
       if (data) setActivities(data)
     }
@@ -40,13 +47,13 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'activities' },
-        async (payload: any) => {
+        async (payload: { new: any }) => {
           const { data: profile } = await (getSupabase() as any)
             .from('profiles')
             .select('name')
             .eq('id', payload.new.user_id)
             .single()
-          const newActivity = { ...payload.new, profiles: profile || { name: 'Unknown' } } as Activity
+          const newActivity = { ...payload.new, profiles: profile || { name: 'Unknown' } }
           setActivities((prev) => [newActivity, ...prev.slice(0, 49)])
         }
       )
@@ -57,7 +64,7 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
     }
   }, [])
 
-  const addActivity = async (actionType: 'BUG' | 'LAB' | 'WRITEUP', details: string) => {
+  const addActivity = async (actionType: 'BUG' | 'LAB' | 'TIP', details: string) => {
     await (getSupabase() as any).from('activities').insert({
       user_id: userId,
       action_type: actionType,
@@ -65,28 +72,103 @@ export function RealtimeFeed({ userId }: RealtimeFeedProps) {
     })
   }
 
+  const submitTip = async () => {
+    if (!tipText.trim()) return
+    await addActivity('TIP', tipText)
+    setTipText('')
+  }
+
   return (
-    <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4 h-96 overflow-y-auto font-mono text-sm">
-      <AnimatePresence>
-        {activities.map((activity, index) => (
-          <motion.div
-            key={activity.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ delay: index * 0.1 }}
-            className={`mb-2 p-2 rounded ${actionStyles[activity.action_type]}`}
+    <motion.div
+      initial={{ opacity: 0, x: 50 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.6 }}
+      className="bg-[#0a0a0a] border border-emerald-500/20 rounded-lg p-6 backdrop-blur-md bg-opacity-10 h-full flex flex-col"
+    >
+      <h3 className="text-lg font-semibold mb-4 text-emerald-400 font-mono flex items-center gap-2">
+        <Lightbulb size={20} />
+        INTEL FEED
+      </h3>
+
+      {/* Intel Input */}
+      <div className="mb-6">
+        <div className="flex gap-2">
+          <textarea
+            value={tipText}
+            onChange={(e) => setTipText(e.target.value)}
+            placeholder="Drop a tip... (Markdown supported)"
+            rows={3}
+            className="flex-1 px-4 py-3 bg-[#1a1a1a] border border-emerald-500/20 rounded-md text-white placeholder-gray-500 focus:border-emerald-400 focus:outline-none transition-colors font-mono resize-none"
+          />
+          <Button
+            onClick={submitTip}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 rounded-md transition-colors"
           >
-            [{new Date(activity.timestamp).toLocaleTimeString()}] &gt; {activity.profiles?.name || 'Unknown'} &lt;{activity.action_type}&gt; : {activity.details}
-          </motion.div>
-        ))}
-      </AnimatePresence>
-      {/* For demo, add some buttons to add activities */}
-      <div className="mt-4 flex space-x-2">
-        <button onClick={() => addActivity('BUG', 'Found XSS vulnerability')} className="px-2 py-1 bg-red-600 text-white rounded">Add Bug</button>
-        <button onClick={() => addActivity('LAB', 'Testing payload in lab')} className="px-2 py-1 bg-blue-600 text-white rounded">Add Lab</button>
-        <button onClick={() => addActivity('WRITEUP', 'Completed writeup for CVE-2023-XXXX')} className="px-2 py-1 bg-teal-600 text-white rounded">Add Writeup</button>
+            <Send size={16} />
+          </Button>
+        </div>
+        <p className="text-xs text-gray-500 mt-2 font-mono">
+          Share payloads, techniques, or insights with the team
+        </p>
       </div>
-    </div>
+
+      {/* Activity Feed */}
+      <div className="flex-1 overflow-y-auto space-y-3">
+        <AnimatePresence>
+          {activities.map((activity, index) => (
+            <motion.div
+              key={activity.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ delay: index * 0.05 }}
+              className={`p-3 rounded-md border ${actionStyles[activity.action_type]} backdrop-blur-sm bg-opacity-50`}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <span className="text-xs font-mono text-gray-400">
+                  {new Date(activity.created_at).toLocaleTimeString()}
+                </span>
+                <span className="text-xs font-mono text-emerald-400">
+                  {activity.profiles?.name || 'Unknown'}
+                </span>
+              </div>
+              <div className="text-sm font-mono">
+                <span className="text-emerald-400">[{activity.action_type}]</span> {activity.details}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="mt-4 pt-4 border-t border-emerald-500/20">
+        <div className="flex gap-2">
+          <Button
+            onClick={() => addActivity('BUG', 'Found critical vulnerability')}
+            size="sm"
+            variant="outline"
+            className="flex-1 border-red-500/20 hover:bg-red-500/10 font-mono text-xs"
+          >
+            + BUG
+          </Button>
+          <Button
+            onClick={() => addActivity('LAB', 'Testing new payload')}
+            size="sm"
+            variant="outline"
+            className="flex-1 border-blue-500/20 hover:bg-blue-500/10 font-mono text-xs"
+          >
+            + LAB
+          </Button>
+          <Button
+            onClick={() => addActivity('TIP', 'Completed detailed writeup')}
+            size="sm"
+            variant="outline"
+            className="flex-1 border-teal-500/20 hover:bg-teal-500/10 font-mono text-xs"
+          >
+            + TIP
+          </Button>
+        </div>
+      </div>
+    </motion.div>
   )
 }

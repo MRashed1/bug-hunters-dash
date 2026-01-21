@@ -3,18 +3,43 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { StatusAvatar } from '@/components/StatusAvatar'
-import { SessionController } from '@/components/SessionController'
+import { CommandCenter } from '@/components/CommandCenter'
 import { RealtimeFeed } from '@/components/RealtimeFeed'
+import { SubmissionForm } from '@/components/SubmissionForm'
 import { getSupabase } from '@/lib/supabase'
-import { Database } from '@/types/database'
+import { Button } from '@/components/ui/button'
+import { Plus, Users, LogOut } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
-type Profile = Database['public']['Tables']['profiles']['Row']
+type Profile = {
+  id: string
+  name: string
+  avatar_url: string | null
+  status: 'HUNTING' | 'RESEARCHING' | 'IDLE' | 'OFFLINE'
+}
 
 export default function Home() {
   const [profiles, setProfiles] = useState<Profile[]>([])
-  const [currentUserId] = useState('1') // Demo user
+  const [currentUserId, setCurrentUserId] = useState<string>('')
+  const [currentStatus, setCurrentStatus] = useState('OFFLINE')
+  const [showSubmissionForm, setShowSubmissionForm] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await (getSupabase() as any).auth.getUser()
+      if (user) {
+        setCurrentUserId(user.id)
+      } else {
+        router.push('/login')
+      }
+    }
+    getCurrentUser()
+  }, [router])
+
+  useEffect(() => {
+    if (!currentUserId) return
+
     const fetchProfiles = async () => {
       const { data } = await (getSupabase() as any).from('profiles').select('*')
       if (data) setProfiles(data)
@@ -29,8 +54,11 @@ export default function Home() {
         { event: 'UPDATE', schema: 'public', table: 'profiles' },
         (payload: any) => {
           setProfiles((prev) =>
-            prev.map((p) => (p.id === payload.new.id ? payload.new as Profile : p))
+            prev.map((p) => (p.id === payload.new.id ? payload.new : p))
           )
+          if (payload.new.id === currentUserId) {
+            setCurrentStatus(payload.new.status)
+          }
         }
       )
       .subscribe()
@@ -38,108 +66,128 @@ export default function Home() {
     return () => {
       (getSupabase() as any).removeChannel(channel)
     }
-  }, [])
+  }, [currentUserId])
+
+  const handleLogout = async () => {
+    await (getSupabase() as any).auth.signOut()
+    router.push('/login')
+  }
 
   const handleStatusChange = (_status: string) => {
-    // Update local state or something
+    setCurrentStatus(_status)
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white grid grid-cols-12 gap-4 p-4">
-      {/* Sidebar */}
-      <motion.div
-        className="col-span-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4"
-        initial={{ x: -50, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-      >
-        <h2 className="text-xl font-bold mb-4 text-[#10b981]">Squad Status</h2>
-        <div className="space-y-4">
-          {profiles.map((profile, index) => (
-            <motion.div
-              key={profile.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <StatusAvatar
-                name={profile.name}
-                avatarUrl={profile.avatar_url || undefined}
-                status={profile.status}
-              />
-              <p className="text-sm mt-2">{profile.name}</p>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
+    <div className="min-h-screen bg-[#050505] text-white overflow-hidden">
+      {/* Background Effects */}
+      <div className="fixed inset-0 bg-gradient-to-br from-emerald-900/10 via-transparent to-blue-900/10" />
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.05),transparent_50%)]" />
 
-      {/* Main Content */}
-      <div className="col-span-9 space-y-4">
-        {/* Hero Section */}
-        <motion.div
-          className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-8 text-center"
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
+      <div className="relative z-10 p-6 min-h-screen flex flex-col">
+        {/* Header */}
+        <motion.header
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="flex justify-between items-center mb-8"
         >
-          <h1 className="text-4xl font-bold text-[#10b981] mb-4">The Breach Dashboard</h1>
-          <SessionController userId={currentUserId} onStatusChange={handleStatusChange} />
-        </motion.div>
+          <div>
+            <h1 className="text-4xl font-bold text-emerald-400 font-mono tracking-wider">
+              THE BREACH DASHBOARD
+            </h1>
+            <p className="text-gray-400 font-mono text-sm mt-1">
+              Cyber Operations Center • Real-time Intelligence Hub
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={() => setShowSubmissionForm(true)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-mono px-6 py-3 rounded-md transition-colors flex items-center gap-2"
+            >
+              <Plus size={20} />
+              SUBMIT FINDING
+            </Button>
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="border-red-500/20 hover:bg-red-500/10 text-red-400 font-mono px-4 py-3 rounded-md transition-colors flex items-center gap-2"
+            >
+              <LogOut size={20} />
+              LOGOUT
+            </Button>
+          </div>
+        </motion.header>
 
-        {/* Progress and Feed */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* Main Grid - Zero-G Layout */}
+        <div className="flex-1 grid grid-cols-12 gap-6">
+          {/* Squad Status - Floating Panel */}
           <motion.div
-            className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4"
-            initial={{ x: 50, opacity: 0 }}
+            initial={{ x: -100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="col-span-3"
           >
-            <h3 className="text-lg font-semibold mb-2 text-[#f59e0b]">Daily Progress</h3>
-            {/* Circular progress bar placeholder */}
-            <div className="w-32 h-32 mx-auto border-4 border-[#1a1a1a] rounded-full flex items-center justify-center">
-              <span className="text-2xl">75%</span>
+            <div className="bg-[#0a0a0a] border border-emerald-500/20 rounded-lg p-6 backdrop-blur-md bg-opacity-10 sticky top-6">
+              <h2 className="text-xl font-bold text-emerald-400 mb-6 font-mono flex items-center gap-2">
+                <Users size={24} />
+                SQUAD STATUS
+              </h2>
+              <div className="space-y-4">
+                {profiles.map((profile, index) => (
+                  <motion.div
+                    key={profile.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 + 0.3 }}
+                    className="flex items-center gap-4 p-3 rounded-md border border-emerald-500/10 hover:border-emerald-500/30 transition-colors"
+                  >
+                    <StatusAvatar
+                      name={profile.name}
+                      avatarUrl={profile.avatar_url || undefined}
+                      status={profile.status}
+                    />
+                    <div>
+                      <div className="font-mono text-sm text-emerald-400">{profile.name}</div>
+                      <div className="font-mono text-xs text-gray-500">{profile.status}</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </motion.div>
 
-          <motion.div
-            className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4"
-            initial={{ x: 50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <h3 className="text-lg font-semibold mb-2 text-[#3b82f6]">Activity Log</h3>
+          {/* Main Operations Area */}
+          <div className="col-span-9 space-y-6">
+            {/* Command Center */}
+            <CommandCenter
+              userId={currentUserId}
+              currentStatus={currentStatus}
+              onStatusChange={handleStatusChange}
+            />
+
+            {/* Intel Feed */}
             <RealtimeFeed userId={currentUserId} />
-          </motion.div>
+          </div>
         </div>
 
-        {/* Shared Intelligence */}
-        <motion.div
-          className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4"
+        {/* Submission Form Modal */}
+        <SubmissionForm
+          userId={currentUserId}
+          isOpen={showSubmissionForm}
+          onClose={() => setShowSubmissionForm(false)}
+        />
+
+        {/* Footer */}
+        <motion.footer
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4 }}
+          transition={{ duration: 0.8, delay: 1 }}
+          className="mt-8 text-center"
         >
-          <h3 className="text-lg font-semibold mb-4 text-[#10b981]">Shared Intelligence</h3>
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { title: 'XSS Payload', link: 'https://example.com/payload1' },
-              { title: 'SQL Injection Guide', link: 'https://example.com/guide' },
-              { title: 'Recon Tools', link: 'https://example.com/tools' },
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-lg p-4 cursor-pointer hover:scale-105 transition-transform"
-                whileHover={{ rotateY: 5 }}
-              >
-                <h4 className="font-medium mb-2">{item.title}</h4>
-                <button
-                  className="text-sm text-[#3b82f6] hover:underline"
-                  onClick={() => navigator.clipboard.writeText(item.link)}
-                >
-                  Copy Link
-                </button>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+          <p className="text-gray-500 font-mono text-sm">
+            Secure • Encrypted • Real-time • Breach Ready
+          </p>
+        </motion.footer>
       </div>
     </div>
   )
