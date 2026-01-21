@@ -22,15 +22,32 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const { error } = await (getSupabase() as any).auth.signInWithPassword({
+      console.log('Attempting login with:', { email, password: '***' })
+
+      const { data, error } = await (getSupabase() as any).auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) throw error
+      console.log('Login response:', { data: data ? 'success' : null, error })
 
-      router.push('/')
+      if (error) {
+        console.error('Login error:', error)
+        throw error
+      }
+
+      if (data?.user) {
+        console.log('Login successful, redirecting...')
+        // Wait a moment for the session to be established
+        await new Promise(resolve => setTimeout(resolve, 100))
+
+        // Force a page reload to ensure middleware picks up the new session
+        window.location.href = '/'
+      } else {
+        throw new Error('No user data received')
+      }
     } catch (err: any) {
+      console.error('Login failed:', err)
       setError(err.message || 'Login failed')
     } finally {
       setIsLoading(false)
