@@ -69,6 +69,7 @@ export function CommandCenter({ userId, currentStatus, onStatusChange }: Command
       .insert({
         user_id: userId,
         type: sessionType,
+        start_time: startTime.toISOString(),
         duration_minutes: durationMinutes,
         end_time: endTime.toISOString()
       })
