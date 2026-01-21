@@ -154,7 +154,7 @@ export default function LoginPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="mt-8 text-center"
+            className="mt-8 text-center space-y-2"
           >
             <p className="text-gray-500 text-sm font-mono">
               Don't have an account?{' '}
@@ -162,7 +162,12 @@ export default function LoginPage() {
                 Join the breach
               </Link>
             </p>
-            <p className="text-gray-500 text-sm font-mono mt-2">
+            <p className="text-gray-500 text-sm font-mono">
+              <Link href="/forgot-password" className="text-emerald-400 hover:text-emerald-300 transition-colors">
+                Forgot your password?
+              </Link>
+            </p>
+            <p className="text-gray-500 text-sm font-mono mt-4">
               Unauthorized access is prohibited
             </p>
           </motion.div>
